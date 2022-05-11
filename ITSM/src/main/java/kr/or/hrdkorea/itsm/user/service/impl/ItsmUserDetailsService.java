@@ -29,17 +29,6 @@ public class ItsmUserDetailsService implements UserDetailsService {
 	SysUserService sysUserService;
 
     @Override
-//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        if ("user_id".equals(username)) {
-//            return new User("user_id", "$2a$10$m/enYHaLsCwH2dKMUAtQp.ksGOA6lq7Fd2pnMb4L.yT4GyeAPRPyS",
-//                getAuthorities());
-//        	
-//        	
-//        } else {
-//            throw new UsernameNotFoundException("User not found with username: " + username);
-//        }
-//        
-//    } 
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
     	
     	SysUserVO paramVO = new SysUserVO();
