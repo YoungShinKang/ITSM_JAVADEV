@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ITSM_BOARD">
+
+<resultMap id="amAppVO" type="kr.or.hrdkorea.itsm.am.model.AmAppVO" >
+<collection property="amServices" ofType="kr.or.hrdkorea.itsm.am.model.AmServiceVO" />
+</resultMap>		
+
+<select id="selectAmAppList" resultMap="amAppVO" parameterType="String">
+	
+	SELECT
+		app.CONF_ID
+		,app.APP_DESC
+		,service.SERVICE_ID
+		,service.SERVICE_NM
+		,service.UP_SERVICE_ID
+		,service.DISPLAY_NO
+		,service.USE_YN
+		,service.SERVICE_DESC	
+		,service.SERVICE_IMG
+	FROM
+		AM_APP app
+		,AM_SERVICE service
+	WHERE
+		app.CONF_ID = service.UP_SERVICE_ID
+		and service.SERVICE_ID IN (
+			SELECT SERVICE_ID FROM AM_SERVICE_OPER WHERE OPER_USER_ID = #{userId}
+		)
+	ORDER BY app.CONF_ID, service.DISPLAY_NO
+
+</select>
+
+</mapper>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ITSM_BOARD">
+
+<resultMap id="amAppVO" type="kr.or.hrdkorea.itsm.am.model.AmAppVO" >
+<collection property="amServices" ofType="kr.or.hrdkorea.itsm.am.model.AmServiceVO" />
+</resultMap>		
+
+<select id="selectAmAppList" resultMap="amAppVO" parameterType="String">
+	
+	SELECT
+		app.CONF_ID
+		,app.APP_DESC
+		,service.SERVICE_ID
+		,service.SERVICE_NM
+		,service.UP_SERVICE_ID
+		,service.DISPLAY_NO
+		,service.USE_YN
+		,service.SERVICE_DESC	
+		,service.SERVICE_IMG
+	FROM
+		AM_APP app
+		,AM_SERVICE service
+	WHERE
+		app.CONF_ID = service.UP_SERVICE_ID
+		and service.SERVICE_ID IN (
+			SELECT SERVICE_ID FROM AM_SERVICE_OPER WHERE OPER_USER_ID = #{userId}
+		)
+	ORDER BY app.CONF_ID, service.DISPLAY_NO
+
+</select>
+
+
+<select id="searchServiceRequestList" parameterType="HashMap" resultType="HashMap">
+	SELECT *
+	  FROM ( SELECT
+	  	<!--  아래 구문은 차후에는 $를 쓰지 않도록 검색 옵션을 통일해서 옵션별로 컬럼을 다 지정하는 것이 옳은 코딩이다.
+	  	아니면 해당 컬럼을 검사하는 필터링 라이브러리 같은 걸 쓰던지...아예 사용하지 않는게 옳은 접근이다. -->
+	  	<choose>
+	  		<when test="sort_column == null">
+	  			ROW_NUMBER () OVER (ORDER BY REG_DT DESC) RNUM
+	  		</when>
+	  		<otherwise>
+	  			ROW_NUMBER () OVER (ORDER BY ${sort_column}) RNUM
+	  		</otherwise>
+	  	</choose>
+			, A.*
+                 FROM ( SELECT *
+                 		   FROM (
+                 		   		 <include refid="searchServiceRequestList_query" />
+                               )
+                         WHERE
+                         	1=1
+         		   		 <include refid="searchServiceRequestList_search" />
+                      ) A
+            ) A
+        WHERE RNUM BETWEEN  #{first_num} AND #{last_num}
+</select>
+
+<select id="searchServiceRequestListCount" parameterType="HashMap" resultType="Integer">
+	SELECT COUNT(*)
+	  FROM (
+	  		 <include refid="searchServiceRequestList_query" />
+	  	   )
+      WHERE
+      	1=1
+	 <include refid="searchServiceRequestList_search" />
+</select>
+
+<sql id="searchServiceRequestList_query">
+       SELECT
+              A.SR_ID
+            , A.PROC_ID
+            , FC_GET_CODE_NM('REQ_TYPE', A.REQ_TYPE) AS REQ_TYPE_NM
+            , A.REQ_TYPE
+            , A.TITLE
+            , A.REQ_USER_ID
+		 , FC_GET_CODE_NM('WORK_STATE', A.WORK_STATE) AS WORK_STATE_NM
+		 , A.WORK_STATE
+            , FC_GET_USER_NM(A.REQ_USER_ID) AS REQ_USER_NM
+            , TO_CHAR(A.REQ_DT,'YYYY-MM-DD HH24:MI') AS REQ_DT
+            , FC_GET_CODE_NM('SERVICE_STATE', A.WORK_STATE) AS TASK_NAME
+		 , '' TASK_ID
+            , TO_CHAR(A.HOPE_DT,'YYYY-MM-DD HH24:MI') AS HOPE_DT
+            , TO_CHAR(A.DUE_DT,'YYYY-MM-DD HH24:MI') AS DUE_DT
+            , TO_CHAR(A.END_DT,'YYYY-MM-DD HH24:MI') AS END_DT
+		 , (SELECT X.ACTUALOWNER_ID FROM PROC_DETAIL X 
+		     WHERE SR_ID = A.SR_ID AND X.WORK_STATE = 'SERVICE_ACCEPT') AS RECEIPT_USER_ID
+		 , (SELECT FC_GET_USER_NM(X.ACTUALOWNER_ID) FROM PROC_DETAIL X 
+		     WHERE SR_ID = A.SR_ID AND X.WORK_STATE = 'SERVICE_ACCEPT') AS RECEIPT_USER_NM
+            , REG_DT
+		 , B.SYSTEM_TYPE
+		 , (SELECT CONF_NM FROM AM_INFRA WHERE CONF_ID = B.SYSTEM_TYPE) AS SYSTEM_TYPE_NM 
+		 , B.SUB_WORK
+		 , (SELECT SERVICE_NM FROM AM_SERVICE WHERE SERVICE_ID = B.SUB_WORK) AS SUB_WORK_NM 
+		 , B.SERVICE_TYPE
+		 , FC_GET_CODE_NM('SVR_REQ_TYPE', B.SERVICE_TYPE) AS SERVICE_TYPE_NM 
+	  FROM PROC_MASTER    A,
+     	   	   PROC_SERVICE B
+     <!-- in 구문을 사용할 수 있다. -->
+     WHERE 1=1
+     <choose>
+            <when test="work_state_list.size != 0">
+                AND A.WORK_STATE IN
+                <foreach collection="work_state_list" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </when>
+     </choose>
+	 AND A.SR_ID = B.SR_ID
+  	     AND SUB_WORK IN (SELECT SERVICE_ID FROM AM_SERVICE WHERE SERVICE_ID IN ( SELECT SERVICE_ID FROM AM_SERVICE_OPER WHERE OPER_USER_ID = #{user_id}))
+</sql>
+
+<sql id="searchServiceRequestList_search">
+		<if test="req_user_nm != null">
+			AND REQ_USER_NM LIKE '%'||#{req_user_nm}||'%'
+		</if>
+		<if test="req_type != null">
+			AND REQ_TYPE = #{req_type}
+		</if>
+		<if test="service_type != null">
+			AND SERVICE_TYPE = #{service_type}
+		</if>
+		<if test="system_type != null">
+		   AND SYSTEM_TYPE = #{system_type}
+		</if>
+		<if test="sub_work != null">
+		   AND SUB_WORK = #{sub_work}
+		</if>
+		<if test="sr_id != null">
+			AND SR_ID LIKE '%'||#{sr_id}||'%'
+		</if>
+		<if test="title != null">
+			AND TITLE LIKE '%'||#{title}||'%'
+		</if>
+		<if test="task_name != null">
+			AND TASK_NAME LIKE '%'||#{task_name}||'%'
+		</if>
+		<if test="reg_dt != null">
+			AND TO_CHAR(REG_DT, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+		</if>
+		<if test="end_dt_startDate != null">
+			AND END_DT BETWEEN #{end_dt_startDate}||' 00:00:00' AND #{end_dt_endDate}||' 23:59:59'
+		</if>
+		<if test="req_dt_startDate != null">
+			AND REQ_DT BETWEEN #{req_dt_startDate}||' 00:00:00' AND #{req_dt_endDate}||' 23:59:59'
+		</if>		
+	</sql>
+
+</mapper>

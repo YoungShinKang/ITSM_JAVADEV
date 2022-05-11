@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SYS_USER">
+	<resultMap id="sysUserVO" type="kr.or.hrdkorea.itsm.user.model.SysUserVO" />
+	
+	<select id="selectLogin" resultMap="sysUserVO" parameterType="kr.or.hrdkorea.itsm.user.model.SysUserVO">
+		<![CDATA[
+			SELECT
+				USER_ID,
+				PW,
+				USER_NM
+			FROM SYS_USER A
+			WHERE USER_ID = #{userId}
+		]]>
+	
+	</select>
+	
+	<select id="selectUserInfo" parameterType="String" resultType="kr.or.hrdkorea.itsm.user.model.UserVO">
+ 		SELECT FC_GET_CUST_NM(CUST_ID) AS CUST_NM
+ 			 , CUST_OP_TYPE
+ 			 , FC_GET_CODE_NM('USER_CLASS', CUST_OP_TYPE) AS CUST_OP_TYPE_NM
+ 			 , CUST_ID
+ 			 , EMAIL
+ 			 , USER_NM
+ 			 , USER_ID
+ 			 , TEL_NO
+             , POSITION
+             , HP_NO
+          FROM SYS_USER
+         WHERE USER_ID = #{value, jdbcType=VARCHAR}
+ 	</select> 
+</mapper>
