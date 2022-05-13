@@ -30,6 +30,7 @@
 <!-- 이 설정은 cors 옵션이라서 아마 운영에서는 필요가 없을 수 있다. -->
 <!-- 크로스 도메인 설정이 되었고, ajax가 호출이 되나, 리엑트 화면에서 security의 경우 필터 후 react 로그인 화면에서 크로스도메인 이슈가 발생함. 
 이슈 해결을 위해서 react 개발 환경에서 cors 모듈설치하며 proxy 설정됨. 아래의 문구는 주석 처리 함-->
+<!--  
 <bean id="corsSource" class="org.springframework.web.cors.UrlBasedCorsConfigurationSource">
     <property name="corsConfigurations">
         <util:map>
@@ -63,9 +64,15 @@
         </util:map>
     </property>
 </bean>
+-->
 
+<!-- 에러시 redirect 하는 부분의 처리를 위해서 아래의 entry point 말고 custom 클래스를 사용한다. -->
+<!--
 <bean id="loginUrlAuthenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-    <constructor-arg value="http://localhost:3000"/>
+    <constructor-arg value="http://localhost:3000/error"/>
+</bean>
+-->
+<bean id="ItsmAuthenticationEntryPoint" class="kr.or.hrdkorea.itsm.user.cmmn.ItsmAuthenticationEntryPoint">
 </bean>
 
 <security:authentication-manager alias="authenticationManager"> 
@@ -84,7 +91,7 @@
 -->
 
 <security:http auto-config="false" use-expressions="true" 
-		entry-point-ref="loginUrlAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
+		entry-point-ref="ItsmAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
 	<security:csrf disabled="true"/>
 	<!-- 
 	<security:intercept-url pattern="/test/*" access="hasRole('ROLE_USER')" />
@@ -92,6 +99,7 @@
 	<!-- 이게 없어도 되네? 이유는 상단에 /test/* 경로만 ROLE_USER를 적용했기 때문인 것 같다. -->
 	<security:intercept-url pattern="/auth/*" access="permitAll()" />
 	<security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
+
 	<!-- 이 설정은 React 방식이 아닌 Form 기반의 API 로그인 화면을 위한 설정이다. -->
 	<!--  
     <security:custom-filter position="FORM_LOGIN_FILTER" ref="customUsernamePasswordAuthenticationFilter"/>
@@ -100,8 +108,10 @@
     <!-- 이 설정은 크로스 도메인 관련 설정이라서 아마 운영에서는 필요가 없을 수 있다. -->
     <!-- 크로스 도메인 설정이 되었고, ajax가 호출이 되나, 리엑트 화면에서 security의 경우 필터 후 react 로그인 화면에서 크로스도메인 이슈가 발생함. 
          이슈 해결을 위해서 react 개발 환경에서 cors 모듈설치하며 proxy 설정됨. 아래의 문구는 주석 처리 함-->
+    <!--
     <security:intercept-url method="OPTIONS" pattern="/**" access="isAnonymous()"/>
     <security:cors configuration-source-ref="corsSource" />
+    -->
 </security:http>
 
 
