@@ -35,6 +35,7 @@ public class ItsmUserDetailsService implements UserDetailsService {
     	paramVO.setUserId(userId);    	
     	SysUserVO sysUserVO = sysUserService.selectLogin(paramVO);
     	
+    	
     	if(sysUserVO != null) {
     		return new User(sysUserVO.getUserId(), sysUserVO.getPw(),
                     getAuthorities());

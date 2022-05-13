@@ -64,7 +64,7 @@ public class RestAuthenticationController {
 
         final UserDetails userDetails = userDetailsService
             .loadUserByUsername(sysUserVO.getUserId());
-
+        
         final String token = authTokenUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(new AuthResponse(token));
