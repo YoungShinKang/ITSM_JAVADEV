@@ -36,6 +36,8 @@ public class RestAuthenticationController {
 	@Autowired
     private AuthTokenUtil authTokenUtil;
 	
+	/*
+	
 	@PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authenticationRequest) throws Exception {
         
@@ -45,9 +47,11 @@ public class RestAuthenticationController {
             .loadUserByUsername(authenticationRequest.getUsername());
 
         final String token = authTokenUtil.generateToken(userDetails);
+        final String username = userDetails.getUsername();
 
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(token,username));
     }
+    */
 	
 	
 	
@@ -58,16 +62,20 @@ public class RestAuthenticationController {
 	 * 상단의 로그인의 실 버전으로 내용은 동일하다. 다만 파라미터 VO가 다르다
 	 */
 	@PostMapping("/authenticate")
-    public ResponseEntity<?> userAuthneicate(@RequestBody SysUserVO sysUserVO) throws Exception {
+	public ResponseEntity<?> userAuthneicate(@RequestBody AuthRequest authenticationRequest) throws Exception {
+    //public ResponseEntity<?> userAuthneicate(@RequestBody SysUserVO sysUserVO) throws Exception {
         
-		authenticate(sysUserVO.getUserId(), sysUserVO.getPw());
+		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+		//authenticate(sysUserVO.getUserId(), sysUserVO.getPw());
 
-        final UserDetails userDetails = userDetailsService
-            .loadUserByUsername(sysUserVO.getUserId());
+		final UserDetails userDetails = userDetailsService
+	            .loadUserByUsername(authenticationRequest.getUsername());
+		//final UserDetails userDetails = userDetailsService.loadUserByUsername(sysUserVO.getUserId());
         
         final String token = authTokenUtil.generateToken(userDetails);
+        final String username = userDetails.getUsername();
 
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(token,username));
     }
 	
 	private void authenticate(String username, String password) throws Exception {
