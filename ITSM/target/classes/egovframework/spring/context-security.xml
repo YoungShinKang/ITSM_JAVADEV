@@ -97,7 +97,7 @@
 	<security:intercept-url pattern="/test/*" access="hasRole('ROLE_USER')" />
 	-->
 	<!-- 이게 없어도 되네? 이유는 상단에 /test/* 경로만 ROLE_USER를 적용했기 때문인 것 같다. -->
-	<security:intercept-url pattern="/auth/*" access="permitAll()" />
+	<security:intercept-url pattern="/auth/*" access="permitAll()" />	
 	<security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
 
 	<!-- 이 설정은 React 방식이 아닌 Form 기반의 API 로그인 화면을 위한 설정이다. -->
