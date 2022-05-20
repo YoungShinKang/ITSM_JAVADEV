@@ -84,15 +84,9 @@ public class ItsmBoardServiceImpl implements ItsmBoardService {
 		//만약 start와 ,page,limit가 설정되지 않았으면 값을 넣어준다.
 		if(paramMap.get("start") == null) paramMap.put("start", 1);
 		if(paramMap.get("page") == null) paramMap.put("page", 1);
-		if(paramMap.get("limit") == null) paramMap.get("total_count", 1);
+		if(paramMap.get("limit") == null) paramMap.put("limit", paramMap.get("total_count"));
 		
-		PagingUtil.getFristEndNum(paramMap);
-		
-
-      
-      //paramMap.put("work_state_list", paramMap.get("workState"));
-
-      
+		PagingUtil.getFristEndNum(paramMap);      
       
 		return this.itsmBoardDao.searchServiceRequestList(paramMap);
 	}

@@ -70,8 +70,8 @@ public class RestBoardController {
 	public ResultVO searchServicedeskList(@RequestBody ModelMap paramMap) throws Exception
 	  {		  
 		//임시로 셋팅
-		String userId = "frazer93";		
-		paramMap.put("user_id", userId);
+		//String userId = "frazer93";		
+		//paramMap.put("user_id", userId);
 		
 	    GridVO gridVO = new GridVO();
 	    ResultVO resultVO = new ResultVO();
@@ -81,14 +81,14 @@ public class RestBoardController {
 	      int totalCount = 0;
 
 	      //이 리스트는 클라이언트에서 넘어와야 함
-	      List <String> workState = Arrays.asList("REQUEST","SERVICE_GROUP");
-	      
+	      List <String> workState = Arrays.asList((String)paramMap.get("status"));	      
 	      paramMap.put("work_state_list", workState);
-
-	      PagingUtil.getFristEndNum(paramMap);
-	      
 	      
 	      totalCount = this.itsmBoardService.searchServiceRequestListCount(paramMap);
+	      
+	      //페이징 처리를 위해 총 수를 param에 넣어준다.
+	      paramMap.put("total_count",totalCount);
+
 	      List resultList = this.itsmBoardService.searchServiceRequestList(paramMap);
 	      
 	      
