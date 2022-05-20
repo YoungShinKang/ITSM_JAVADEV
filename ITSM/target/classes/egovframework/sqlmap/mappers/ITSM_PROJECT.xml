@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ITSM_PROJECT">
+
+<resultMap type="java.util.HashMap" id="boardListMap">
+	<result property="RNUM" column="RNUM" jdbcType="VARCHAR" javaType="String"/>
+	<result property="NO_ID" column="NO_ID" jdbcType="VARCHAR" javaType="String"/>
+	<result property="TITLE" column="TITLE" jdbcType="VARCHAR" javaType="String"/>
+	<result property="INS_USER_ID" column="INS_USER_ID" jdbcType="VARCHAR" javaType="String"/>
+	<result property="INS_DT" column="INS_DT" jdbcType="VARCHAR" javaType="String"/>
+	<result property="BOARD_COUNT" column="BOARD_COUNT" jdbcType="VARCHAR" javaType="String"/>
+</resultMap>
+
+<select id="searchUserSystemAuthList" parameterType="HashMap" resultType="HashMap">
+	SELECT C.AUTH_ID
+		, C.AUTH_NM
+		, C.AUTH_DESC
+		, C.USE_YN
+	FROM SYS_USERGRP_TO_USER A
+		, SYS_USERGRP_TO_AUTH B
+		, SYS_AUTH C
+	WHERE A.USER_GRP_ID = B.USER_GRP_ID
+		AND A.USER_ID = #{user_id}
+		AND B.AUTH_ID = C.AUTH_ID
+</select>
+
+	
+<select id="searchBoardList" parameterType="HashMap" resultMap="boardListMap">
+	SELECT	*
+		FROM (
+			SELECT ROW_NUMBER () OVER (ORDER BY INS_DT DESC) rnum, bt.*
+				FROM	(
+					SELECT	A.NO_ID
+						, A.TITLE
+						, (SELECT USER_NM FROM SYS_USER B WHERE B.USER_ID = A.INS_USER_ID ) INS_USER_ID
+						, A.INS_DT
+						, A.BOARD_COUNT
+					FROM PORTAL_BOARD_NOTICE A
+					<include refid="searchValue"/>
+				) bt
+			) FINAL
+		WHERE RNUM BETWEEN  #{first_num} AND #{last_num}
+</select>
+
+<select id="searchBoardListCount" parameterType="HashMap" resultType="Integer">
+	SELECT COUNT(*)
+	  FROM (
+	  		 SELECT	A.NO_ID
+				, A.TITLE
+				, (SELECT USER_NM FROM SYS_USER B WHERE B.USER_ID = A.INS_USER_ID ) INS_USER_ID
+				, A.INS_DT
+				, A.BOARD_COUNT
+			FROM PORTAL_BOARD_NOTICE A
+			<include refid="searchValue"/>
+	  	   )
+</select>
+    
+<sql id="searchValue">
+	<trim prefix="WHERE" prefixOverrides="AND|OR">
+		<if test='search_value != null'>
+			<if test='search_type = "TITLE"'>
+				AND UPPER(TITLE) LIKE '%'||UPPER(#{search_value})||'%'
+			</if>
+			<if test='search_type = "INS_USER_ID"'>
+				AND UPPER(INS_USER_ID) IN (SELECT UPPER(USER_ID) FROM SYS_USER WHERE USER_NM LIKE '%'||#{search_value}||'%')
+			</if>
+			<if test='search_type = "CONTENT"'>
+				AND UPPER(CONTENT) LIKE '%'||UPPER(#{search_value})||'%'
+			</if>
+		</if>
+		<if test='use_yn != null'>
+			AND USE_YN = #{use_yn}
+		</if>
+		<if test='pop_yn != null'>
+			AND POP_YN IN ( #{pop_yn} )
+		</if>
+	</trim>
+</sql>
+
+
+
+
+
+</mapper>

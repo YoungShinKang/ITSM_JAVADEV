@@ -1,7 +1,8 @@
-package kr.or.hrdkorea.itsm.board.rest;
+package kr.or.hrdkorea.itsm.project.rest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -25,52 +26,82 @@ import kr.or.hrdkorea.itsm.board.model.ItsmProjectVO;
 import kr.or.hrdkorea.itsm.board.service.ItsmBoardService;
 import kr.or.hrdkorea.itsm.issue.model.ItsmIssueVO;
 import kr.or.hrdkorea.itsm.issue.service.ItsmIssueService;
+import kr.or.hrdkorea.itsm.project.service.ItsmProjectService;
 import kr.or.hrdkorea.itsm.user.model.SysUserVO;
 import kr.or.hrdkorea.itsm.user.service.SysUserService;
 import kr.or.hrdkorea.test.service.RestTestVO;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path="/board")
-public class RestBoardController {
+@RequestMapping(path="/project")
+public class RestProjectController {
 	
-	/*
-	 * @Resource(name = "sysUserService")
-	SysUserService sysUserService;
-	 */
+	@Resource(name = "itsmProjectService")
+	ItsmProjectService itsmProjectService;
 	
 	@Resource(name = "itsmBoardService")
 	ItsmBoardService itsmBoardService;
 	
-	@Resource(name = "itsmIssueService")
-	ItsmIssueService itsmIssueService;
-	
-	
-	/**
-	 * 임시 구현상태
-	 * @param userId
-	 * @return
-	 */
-	@GetMapping("/list/{userId}")
-	public ItsmProjectVO testCall(@PathVariable("userId") String userId) {
-		ItsmProjectVO pjt = new ItsmProjectVO();
-		pjt.setItsmBoardInfo(itsmBoardService.selectItsmBoardInfo(userId));
-		pjt.setIssues(itsmIssueService.selectItsmIssues(userId));		
-		return pjt;
+	@GetMapping("/info/{userId}")
+	public ResultVO searchAuthList(ModelMap paramMap) throws Exception
+	{
+		ResultVO resultVO = new ResultVO();
+		try {
+			
+			//paramMap.put("user_id", paramMap.get("userId"));
+			paramMap.put("user_id", "frazer93");
+			
+			HashMap resultMap = new HashMap();
+			List sysAuthList = this.itsmProjectService.searchUserSystemAuthList(paramMap);
+			  
+			resultMap.put("sysAuthList", sysAuthList);
+			  
+			
+			resultVO.setResultMap(resultMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultVO;
 	}
 	
-	@PostMapping("/createIssue")
-	public ResponseEntity<ItsmIssueVO> cityAdd(@RequestBody ItsmIssueVO itsmIssueVO) {
-		//log.debug("itsmIssueVO = {}", itsmIssueVO.toString());
-		return new ResponseEntity<>(itsmIssueVO, HttpStatus.OK);
+	//@PostMapping("/searchBoradList")
+	//public ResultVO searchBoradList(@RequestBody ModelMap paramMap) throws Exception
+	@GetMapping("/searchBoradList")
+	public ResultVO searchBoradList(ModelMap paramMap) throws Exception	
+	{
+		ResultVO resultVO = new ResultVO();
+		try {
+			
+			HashMap resultMap = new HashMap();
+			
+			/*
+			 * 임시 테스트용 값 설정
+			 */
+			paramMap.put("start", 1);
+			paramMap.put("page", 1);
+			paramMap.put("limit", 100);
+			
+			PagingUtil.getFristEndNum(paramMap);
+			List boardList = this.itsmProjectService.searchBoradList(paramMap);			  
+			resultMap.put("boardList", boardList);
+			  
+			
+			resultVO.setResultMap(resultMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultVO;
 	}
 	
-	
-	@PostMapping("/searchServiceRequestList")
-	public ResultVO searchServicedeskList(@RequestBody ModelMap paramMap) throws Exception
+	//@PostMapping("/searchTodayServiceRequestList")
+	//public ResultVO searchTodayServiceRequestList(@RequestBody ModelMap paramMap) throws Exception
+	@GetMapping("/searchTodayServiceRequestList")
+	public ResultVO searchTodayServiceRequestList(ModelMap paramMap) throws Exception	
 	  {		  
-		//임시로 셋팅
-		String userId = "frazer93";		
+		
+		String userId = "frazer93";
+		String user_grp_id = "";
+		
 		paramMap.put("user_id", userId);
 		
 	    GridVO gridVO = new GridVO();
@@ -80,12 +111,9 @@ public class RestBoardController {
 	    {
 	      int totalCount = 0;
 
-	      //이 리스트는 클라이언트에서 넘어와야 함
 	      List <String> workState = Arrays.asList("REQUEST","SERVICE_GROUP");
 	      
-	      paramMap.put("work_state_list", workState);
-
-	      PagingUtil.getFristEndNum(paramMap);
+	      
 	      
 	      
 	      totalCount = this.itsmBoardService.searchServiceRequestListCount(paramMap);
@@ -102,5 +130,7 @@ public class RestBoardController {
 	    }
 	    return resultVO; 
 	  } 
+	
+	
 
 }
