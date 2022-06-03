@@ -11,8 +11,10 @@ import kr.or.hrdkorea.itsm.user.model.SysUserVO;
 public interface ItsmProjectService {
 	
 	public abstract List searchUserSystemAuthList(ModelMap paramModelMap)
-			throws Exception;
+			throws Exception;	
 	
+	public abstract List personalStatisticsList(ModelMap paramModelMap)
+			throws Exception;	
 	
 	public abstract List searchBoradList(ModelMap paramModelMap)
 			throws Exception;	

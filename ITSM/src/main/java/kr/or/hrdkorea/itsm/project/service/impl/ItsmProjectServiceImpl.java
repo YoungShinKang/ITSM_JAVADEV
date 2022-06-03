@@ -33,6 +33,10 @@ public class ItsmProjectServiceImpl implements ItsmProjectService {
 		return this.itsmProjectDao.searchUserSystemAuthList(paramMap);
 	}
 	
+	public List personalStatisticsList(ModelMap paramMap) throws Exception {
+		return this.itsmProjectDao.searchUserSystemAuthList(paramMap);
+	}
+	
 	public List searchBoradList(ModelMap paramMap) throws Exception {
 		return this.itsmProjectDao.searchBoradList(paramMap);
 	}

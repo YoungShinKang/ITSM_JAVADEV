@@ -33,7 +33,7 @@ import kr.or.hrdkorea.test.service.RestTestVO;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path="/project")
+@RequestMapping(path="/dashBoard")
 public class RestProjectController {
 	
 	@Resource(name = "itsmProjectService")
@@ -42,32 +42,11 @@ public class RestProjectController {
 	@Resource(name = "itsmBoardService")
 	ItsmBoardService itsmBoardService;
 	
-	@GetMapping("/info/{userId}")
-	public ResultVO searchAuthList(ModelMap paramMap) throws Exception
-	{
-		ResultVO resultVO = new ResultVO();
-		try {
-			
-			//paramMap.put("user_id", paramMap.get("userId"));
-			paramMap.put("user_id", "frazer93");
-			
-			HashMap resultMap = new HashMap();
-			List sysAuthList = this.itsmProjectService.searchUserSystemAuthList(paramMap);
-			  
-			resultMap.put("sysAuthList", sysAuthList);
-			  
-			
-			resultVO.setResultMap(resultMap);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return resultVO;
-	}
-	
-	//@PostMapping("/searchBoradList")
-	//public ResultVO searchBoradList(@RequestBody ModelMap paramMap) throws Exception
-	@GetMapping("/searchBoradList")
-	public ResultVO searchBoradList(ModelMap paramMap) throws Exception	
+		
+	@PostMapping("/searchBoradList")
+	public ResultVO searchBoradList(@RequestBody ModelMap paramMap) throws Exception
+	//@GetMapping("/searchBoradList")
+	//public ResultVO searchBoradList(ModelMap paramMap) throws Exception	
 	{
 		ResultVO resultVO = new ResultVO();
 		try {
@@ -93,10 +72,8 @@ public class RestProjectController {
 		return resultVO;
 	}
 	
-	//@PostMapping("/searchTodayServiceRequestList")
-	//public ResultVO searchTodayServiceRequestList(@RequestBody ModelMap paramMap) throws Exception
-	@GetMapping("/searchTodayServiceRequestList")
-	public ResultVO searchTodayServiceRequestList(ModelMap paramMap) throws Exception	
+	@PostMapping("/searchTodayServiceRequestList")
+	public ResultVO searchTodayServiceRequestList(@RequestBody ModelMap paramMap) throws Exception
 	  {		  
 		
 		String userId = "frazer93";
@@ -111,15 +88,11 @@ public class RestProjectController {
 	    {
 	      int totalCount = 0;
 
-	      List <String> workState = Arrays.asList("REQUEST","SERVICE_GROUP");
-	      
-	      
-	      
-	      
+	      List <String> workState = Arrays.asList("REQUEST","SERVICE_GROUP");    
+	            
 	      totalCount = this.itsmBoardService.searchServiceRequestListCount(paramMap);
 	      List resultList = this.itsmBoardService.searchServiceRequestList(paramMap);
-	      
-	      
+	      	      
 	      gridVO.setTotalCount(totalCount);
 	      gridVO.setRows(resultList);
 
@@ -130,6 +103,29 @@ public class RestProjectController {
 	    }
 	    return resultVO; 
 	  } 
+	
+	
+	@GetMapping("/statistics/requestSimple/{userId}")
+	public ResultVO personalStatistics(@PathVariable("userId") String userId) 
+	{
+		ResultVO resultVO = new ResultVO();
+		try {
+			
+			ModelMap paramMap = new ModelMap();		
+			paramMap.put("user_id", userId);
+			
+			HashMap resultMap = new HashMap();
+			List requestStatisticsList = this.itsmProjectService.personalStatisticsList(paramMap);
+			  
+			resultMap.put("requestStatistics", requestStatisticsList);
+			  
+			
+			resultVO.setResultMap(resultMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultVO;
+	}
 	
 	
 

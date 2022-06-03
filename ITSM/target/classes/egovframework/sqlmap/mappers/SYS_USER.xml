@@ -28,5 +28,6 @@
              , HP_NO
           FROM SYS_USER
          WHERE USER_ID = #{value, jdbcType=VARCHAR}
- 	</select> 
+ 	</select>  	
+
 </mapper>

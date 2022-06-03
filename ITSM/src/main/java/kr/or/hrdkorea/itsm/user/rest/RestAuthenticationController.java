@@ -36,24 +36,7 @@ public class RestAuthenticationController {
 	@Autowired
     private AuthTokenUtil authTokenUtil;
 	
-	/*
-	
-	@PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authenticationRequest) throws Exception {
-        
-		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
-        final UserDetails userDetails = userDetailsService
-            .loadUserByUsername(authenticationRequest.getUsername());
-
-        final String token = authTokenUtil.generateToken(userDetails);
-        final String username = userDetails.getUsername();
-
-        return ResponseEntity.ok(new AuthResponse(token,username));
-    }
-    */
-	
-	
 	
 	/**
 	 * @param authenticationRequest

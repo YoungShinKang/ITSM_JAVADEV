@@ -22,6 +22,10 @@ public class ItsmProjectDao extends EgovAbstractMapper {
 		return selectList("ITSM_PROJECT.searchUserSystemAuthList", paramMap);
 	}
 	
+	public List personalStatisticsList(ModelMap paramMap) throws SQLException {	  	
+		return selectList("ITSM_PROJECT.personalStatisticsList", paramMap);
+	}
+	
 	public List searchBoradList(ModelMap paramMap) throws SQLException {	  	
 		return selectList("ITSM_PROJECT.searchBoardList", paramMap);
 	}
