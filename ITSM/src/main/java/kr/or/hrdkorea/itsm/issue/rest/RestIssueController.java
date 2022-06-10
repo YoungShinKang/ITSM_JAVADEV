@@ -39,30 +39,13 @@ public class RestIssueController {
 	@Resource(name = "itsmIssueService")
 	ItsmIssueService itsmIssueService;
 	
-	@GetMapping("/viewIssue/{userId}")
-	public ResultVO selectProcessDetail(@PathVariable("userId") String userId)
-	//@PostMapping("/viewIssue")
-	//public ResultVO selectProcessDetail(@RequestBody ModelMap paramMap)
+	@PostMapping("/viewIssue")
+	public ResultVO selectProcessDetail(@RequestBody ModelMap paramMap)
 	{  
 		Map resultMap = null;
 		ResultVO resultVO = new ResultVO();
-		try {
-			
-			//차후 인증부분이 완성되면 아래 작업을 처리한다.
-			//그런데 userId 자체가 필요가 없을 것 같다.쿼리를 한번 보고 필요없으면 지운다.
-			
-			//UserVO userVO = (UserVO)EgovUserDetailsHelper.getAuthenticatedUser();			
-			//String sr_id = (String)paramMap.get("sr_id");
-			
-			
-			ModelMap paramMap = new ModelMap();		
-			//sr_id
-			paramMap.put("sr_id", "SR220421_0003");
-			
-			
-			//String userId = "adminmgt";			
-			
-			resultMap = itsmIssueService.selectIssueDetail(paramMap, userId);
+		try {		
+			resultMap = itsmIssueService.selectIssueDetail(paramMap);
 			resultVO.setResultMap((HashMap)resultMap);
 		} catch (Exception e) {
 			e.printStackTrace();

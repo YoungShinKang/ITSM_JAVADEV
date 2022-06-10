@@ -34,7 +34,7 @@ public class ItsmProjectServiceImpl implements ItsmProjectService {
 	}
 	
 	public List personalStatisticsList(ModelMap paramMap) throws Exception {
-		return this.itsmProjectDao.searchUserSystemAuthList(paramMap);
+		return this.itsmProjectDao.personalStatisticsList(paramMap);
 	}
 	
 	public List searchBoradList(ModelMap paramMap) throws Exception {

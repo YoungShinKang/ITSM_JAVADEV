@@ -12,6 +12,6 @@ public interface ItsmIssueService {
 	
 	public List<ItsmIssueVO> selectItsmIssues(String userId);
 	
-	public Map selectIssueDetail(ModelMap paramMap, String userId) throws Exception;
+	public Map selectIssueDetail(ModelMap paramMap) throws Exception;
 
 }

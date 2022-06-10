@@ -43,10 +43,9 @@ public class ItsmIssueServiceImpl implements ItsmIssueService {
 		
 	}
 	
-	public Map selectIssueDetail(ModelMap param, String userId) throws Exception {
+	public Map selectIssueDetail(ModelMap param) throws Exception {
 			
-		String sr_id = (String)param.get("sr_id");		
-		param.put("user_id", userId);		
+		String sr_id = (String)param.get("sr_id");
 		
 		//먼저 Proc_master 정보를 불러온다.		
 		Map masterData = this.itsmIssueDao.selectProcessDetail(sr_id);		

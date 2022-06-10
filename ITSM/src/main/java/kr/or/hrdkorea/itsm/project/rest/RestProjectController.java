@@ -105,7 +105,7 @@ public class RestProjectController {
 	  } 
 	
 	
-	@GetMapping("/statistics/requestSimple/{userId}")
+	@GetMapping("/simpleStatistics/{userId}")
 	public ResultVO personalStatistics(@PathVariable("userId") String userId) 
 	{
 		ResultVO resultVO = new ResultVO();
