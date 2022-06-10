@@ -44,6 +44,7 @@ public class RestIssueController {
 	{  
 		Map resultMap = null;
 		ResultVO resultVO = new ResultVO();
+		//신규 주석 처리
 		try {		
 			resultMap = itsmIssueService.selectIssueDetail(paramMap);
 			resultVO.setResultMap((HashMap)resultMap);
