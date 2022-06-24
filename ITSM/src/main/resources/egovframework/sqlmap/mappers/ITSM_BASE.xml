@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ITSM_BASE">
+
+<select id="searchServiceCombo" parameterType="HashMap" resultType="HashMap">
+	SELECT 
+		CONF_ID AS ID
+		,CONF_ID AS CODE_ID
+		, APP_DESC AS CODE_TEXT
+		, '477' AS UP_NODE_ID
+		, ROWNUM AS DISPLAY_NO
+		, 'true' AS LEAF
+		, '1' AS NODE_LEVEL
+		, 'Y' AS CLASS_YN 
+	FROM AM_APP
+		WHERE CONF_ID IN (
+			SELECT UP_SERVICE_ID
+			FROM AM_SERVICE
+			WHERE SERVICE_ID IN ( SELECT SERVICE_ID FROM AM_SERVICE_OPER WHERE OPER_USER_ID = #{user_id})
+		)
+</select>
+
+<select id="searchServiceSubCombo" parameterType="HashMap" resultType="HashMap">
+	SELECT
+		SERVICE_ID AS ID
+		,SERVICE_ID AS CODE_ID
+		, SERVICE_NM AS CODE_TEXT
+		, UP_SERVICE_ID AS UP_NODE_ID
+		, DISPLAY_NO AS DISPLAY_NO
+		, 'true' AS LEAF
+		, '1' AS NODE_LEVEL
+		, 'N' AS CLASS_YN
+	FROM AM_SERVICE
+	WHERE USE_YN = 'Y' 
+		AND UP_SERVICE_ID = #up_node_id#
+</select>
+
+
+<select id="searchServiceTypeCombo" parameterType="HashMap" resultType="HashMap">
+	SELECT 
+		CODE_ID AS CODE_ID
+		, CODE_NM AS CODE_TEXT
+	FROM SYS_CODE 
+	WHERE CODE_GRP_ID = 'SVR_REQ_TYPE'
+		AND CODE_ID != '08'
+		AND USE_YN='Y'
+	ORDER BY CODE_ID ASC
+</select>
+
+<select id="searchServiceTypeCombo_Push" parameterType="HashMap" resultType="HashMap">
+	SELECT 
+		CODE_ID AS CODE_ID
+		, CODE_NM AS CODE_TEXT
+	FROM SYS_CODE 
+	WHERE CODE_GRP_ID = 'SVR_REQ_TYPE'
+		AND USE_YN='Y'
+	ORDER BY CODE_ID ASC
+</select>
+
+</mapper>
