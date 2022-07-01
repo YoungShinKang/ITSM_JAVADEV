@@ -32,7 +32,7 @@
 		, 'N' AS CLASS_YN
 	FROM AM_SERVICE
 	WHERE USE_YN = 'Y' 
-		AND UP_SERVICE_ID = #up_node_id#
+		AND UP_SERVICE_ID = #{up_node_id}
 </select>
 
 

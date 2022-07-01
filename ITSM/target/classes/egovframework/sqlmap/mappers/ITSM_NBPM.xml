@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ITSM_NBPM">
+	
+	<select id="selectFinalVersionProcessInfo" parameterType="String" resultType="kr.or.hrdkorea.itsm.nbpm.model.NbpmProcessVO">
+		SELECT VERSION
+		, PROCESS_NM AS PROCESS_NAME
+		, PROCESSID
+		, PROCESS_TYPE
+		FROM NBPM_DEPLOY
+		WHERE DEPLOY_ID = (SELECT MAX(DEPLOY_ID) FROM NBPM_DEPLOY WHERE PROCESS_TYPE = #{value, jdbcType=VARCHAR})
+	</select>
+	
+	<select id="selectProcessInfo" parameterType="kr.or.hrdkorea.itsm.nbpm.model.NbpmProcessVO" resultType="HashMap">
+		SELECT B.ROLE_ID
+		  FROM TASK A
+		     , NBPM_NODE_DETAIL B 
+		 WHERE A.ID = #task_id# 
+		   AND A.TASK_NAME = B.TASK_NAME
+		   AND A.PROCESSID = B.PROCESSID 
+		   AND B.PROCESSID = #{processId}
+	</select>
+	
+	<select id="createSrId" resultType="String">
+ 		SELECT 'SR'|| TO_CHAR(SYSDATE,'YYMMDD')||'_' || LPAD(NBPM_SR_SEQ.NEXTVAL,4,'0') NBPM_SR_SEQ FROM DUAL	
+	</select>
+	
+	<select id="isExistNbpmUser" parameterType="String" resultType="Integer">
+		SELECT COUNT(*)
+		  FROM ORGANIZATIONALENTITY
+		 WHERE ID = #{value, jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="insertNbpmUser" parameterType="String">
+		INSERT INTO ORGANIZATIONALENTITY (
+				DTYPE
+			  , ID
+		) VALUES ( 
+			    'User'
+			  , #{value, jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="searchNbpmProcessVariable" parameterType="String" resultType="String">
+		SELECT DIVISION_VAILABLE
+		  FROM NBPM_PROCESS_VARIABLE
+		 WHERE PROCESSID = #{value, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="selectExistSrId" parameterType="String" resultType="Integer">
+		SELECT COUNT(*)
+		  FROM PROC_MASTER
+		 WHERE SR_ID = #{value, jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="insertProcessMaster" parameterType="HashMap">
+		INSERT INTO PROC_MASTER (
+			   SR_ID
+			 , PROC_ID
+			 , TITLE
+			 , TASK_ID
+			 , REQ_TYPE
+			 , REQ_ZONE
+			 , REQ_PATH
+			 , CONTENT
+			 , REQ_USER_ID
+			 , REG_USER_ID
+			 , REQ_DT
+			 , REG_DT
+			 , HOPE_DT
+			 , DUE_DT
+			 , PROC_VER
+			 , UP_SR_ID
+			 , REL_INC_SR_ID
+			 , FIRST_YN
+			 , ATCH_FILE_ID
+			 , DISCONTENT_PROC_YN
+			 , LINK_REL
+		) VALUES ( 
+			   #{sr_id}
+			 , #{proc_id}
+			 , #{title}
+			 , #{task_id}
+			 , #{req_type}
+			 , #{req_zone}
+			 , #{req_path}
+			 , #{content}
+			 , #{reg_user_id}
+			 , #{reg_user_id}
+			 , TO_DATE(#{req_dt}, 'YYYY-MM-DDHH24MI')
+			 , SYSDATE
+			 , TO_DATE(#{hope_dt}, 'YYYY-MM-DDHH24MI')
+			 , TO_DATE(#{due_dt}, 'YYYY-MM-DDHH24MI')
+			 , #{proc_ver}
+			 , #{up_sr_id}
+			 , #{rel_inc_sr_id}
+			 , #{first_yn}
+			 , #{atch_file_id}
+			 , 'N'
+			 , #{link_rel}
+		)
+	</insert>
+	
+	<insert id="insertProcessOrerator" parameterType="HashMap">
+		INSERT INTO PROC_OPER (
+				SR_ID
+			  , OPER_TYPE
+			  , SEQ
+			  , OPER_USER_ID
+			  , SELECT_TYPE
+		) VALUES ( 
+			    #{sr_id}
+			  , UPPER(#{oper_type})
+			  , PROC_OPER_SEQ.NEXTVAL
+			  , #{oper_user_id}
+			  , #{select_type}
+		)
+	</insert>
+	
+	<insert id="insertProcessItem" parameterType="HashMap">
+		INSERT INTO PROC_REL_CONF (
+				SR_ID
+			  , ITEM_ID
+			  , ITEM_TYPE
+		) VALUES ( 
+			    #{sr_id}
+			  , #{item_id}
+			  , #{item_type}
+		)
+	</insert>
+	
+	<delete id="deleteProcessOrerator" parameterType="HashMap">
+		DELETE FROM PROC_OPER
+		 WHERE SR_ID = #{sr_id}
+		   AND OPER_TYPE = #{oper_type}
+		   AND SELECT_TYPE = #{select_type}
+	</delete>
+	
+	<delete id="deleteProcessItem" parameterType="String">
+		DELETE FROM PROC_REL_CONF
+		 WHERE SR_ID = #{value, jdbcType=VARCHAR}
+	</delete>
+	
+	<insert id="insertProcessDetail" parameterType="HashMap">
+		INSERT INTO PROC_DETAIL (
+				SR_ID
+			  , SEQ
+			  , ACTUALOWNER_ID
+			  , WORK_STATE
+			  , COMPLETEDON
+			  , COMMENT_TEXT
+			  , INS_DT
+		) VALUES ( 
+			    #{sr_id}
+			  , NVL((SELECT MAX(SEQ)+1 FROM PROC_DETAIL WHERE SR_ID = #{sr_id}), 1) 
+			  , #{actualowner_id}
+			  , #{work_state}
+			  , SYSDATE
+			  , #{comment_text}
+			  , SYSDATE
+			  
+		)
+	</insert>
+	
+	<update id="updateEndWorkState" parameterType="HashMap">
+		UPDATE PROC_MASTER
+		   SET END_TYPE = (SELECT NVL(END_TYPE, #{end_type}) FROM PROC_MASTER WHERE SR_ID = #{sr_id})
+		     , FIRST_YN = (SELECT NVL(FIRST_YN, 'N') FROM PROC_MASTER WHERE SR_ID = #{sr_id})
+		     , LINK_REL = (SELECT NVL(LINK_REL, 'N') FROM PROC_MASTER WHERE SR_ID = #{sr_id})
+		     , STATIS_END_TYPE = (SELECT NVL(STATIS_END_TYPE, 'NOTTRY') FROM PROC_MASTER WHERE SR_ID = #{sr_id})
+		     , WORK_STATE = 'END'
+		     , END_DT = SYSDATE
+		     , WORK_DT =  (SELECT NVL(WORK_DT, SYSDATE) FROM PROC_MASTER WHERE SR_ID = #{sr_id})
+		     , UPD_USER_ID = #{upd_user_id}
+		     , UPD_DT = SYSDATE
+		 WHERE SR_ID = #{sr_id}
+	</update>
+	
+	<update id="updateAtchFileState" parameterType="HashMap">
+		UPDATE SYS_ATCH_FILE_DETAIL
+		   SET WORK_STATE = DECODE(WORK_STATE, NULL, #{work_state}, WORK_STATE)
+		 WHERE ATCH_FILE_ID = (SELECT ATCH_FILE_ID FROM PROC_MASTER WHERE SR_ID = #{sr_id})
+		   AND WORK_STATE IS NULL
+	</update>
+	
+	<update id="updateProcessDetailReject" parameterType="HashMap">
+		UPDATE PROC_DETAIL 
+		   SET CONF_TYPE='R'
+		WHERE SR_ID = #{sr_id}
+		  AND WORK_STATE IN (#{reject_work_state})	  
+		
+	</update>
+	
+	<update id="updateProcessDetailRecheck" parameterType="HashMap">
+		UPDATE PROC_DETAIL 
+		   SET CONF_TYPE='C'
+		WHERE SR_ID = #{sr_id}
+		  AND WORK_STATE IN (#{reject_work_state})
+	</update>
+	
+	<update id="updateProcessDetailFirst" parameterType="HashMap">
+		UPDATE PROC_DETAIL 
+		   SET CONF_TYPE='F'
+		WHERE SR_ID = #{sr_id}
+		  AND WORK_STATE IN (#{reject_work_state})	  
+		
+	</update>
+	
+	<update id="updateProcessMaster" parameterType="HashMap">
+		UPDATE PROC_MASTER
+		SET
+		<if test='title != null'>
+       		TITLE        = #{title},
+		</if>
+		<if test='req_type != null'>
+		       REQ_TYPE        = #{req_type},
+		</if>
+		<if test='req_zone != null'>
+		       REQ_ZONE        = #{req_zone},
+		</if>
+		<if test='rec_dt != null'>
+		       REC_DT        = TO_DATE(#{rec_dt},'YYYY-MM-DDHH24MI'),
+		</if>
+		<if test='req_path != null'>
+		       REQ_PATH        = #{req_path},
+		</if>
+		<if test='content != null'>
+		       CONTENT         = #{content},
+		</if>
+		<if test='req_user_id != null'>
+		       REQ_USER_ID     = #{req_user_id},
+		</if>
+		<if test='reg_user_id != null'>
+		       REG_USER_ID     = #{reg_user_id},
+		</if>
+		<if test='req_dt != null'>
+		       REQ_DT          = TO_DATE(#{req_dt}, 'YYYY-MM-DDHH24MI'),
+		</if>
+		<if test='assign_dt != null'>
+		       ASSIGN_DT       = TO_DATE(#{assign_dt}, 'YYYY-MM-DDHH24MI'),
+		</if>
+		<if test='work_dt != null'>
+		       WORK_DT         = TO_DATE(#{work_dt}, 'YYYY-MM-DDHH24MI'),
+		</if>
+		<if test='end_dt != null'>
+		       END_DT          = TO_DATE(#{end_dt}, 'YYYY-MM-DDHH24MI'),
+		</if>
+		<if test='hope_dt != null'>
+		       HOPE_DT         = TO_DATE(#{hope_dt}, 'YYYY-MM-DDHH24MI'),
+		</if>
+		<if test='due_dt != null'>
+		       DUE_DT          = TO_DATE(#{due_dt}, 'YYYY-MM-DDHH24MI'),
+		</if>
+		<if test='del_yn != null'>
+		       DEL_YN          = #{del_yn},
+		</if>
+		<if test='proc_ver != null'>
+		       PROC_VER        = #{proc_ver},
+		</if>
+		<if test='up_sr_id != null'>
+		       UP_SR_ID        = #{up_sr_id},
+		</if>
+		<if test='rel_inc_sr_id != null'>
+		       REL_INC_SR_ID   = #{rel_inc_sr_id},
+		</if>
+		<if test='end_type != null'>
+		       END_TYPE        = DECODE(#{end_type},' ',NULL,#{end_type}),
+		</if>
+		<if test='happycall_yn != null'>
+		       HAPPYCALL_YN    = #{happycall_yn},
+		</if>
+		<if test='first_yn != null'>
+		       FIRST_YN        = #{first_yn},
+		</if>
+		<if test='statis_check != null'>
+		       STATIS_CHECK   = #{statis_check},
+		</if>
+		<if test='statis_check == "N"'>
+		       STATIS_END_TYPE = 'NOTTRY',
+		</if>
+		<if test='statis_result != null'>
+		       STATIS_END_TYPE = 'COMP',
+		       STATIS_RESULT   = #{statis_result},
+		       STATIS_END_DT   = SYSDATE,
+		</if>
+		<if test='statis_content != null'>
+		       STATIS_CONTENT  = #{statis_content},
+		</if>
+		<if test='result_content != null'>
+		       RESULT_CONTENT  = #{result_content},
+		</if>
+		<if test='atch_file_id != null'>
+		       ATCH_FILE_ID         = #{atch_file_id},
+		</if>
+		<if test='work_state != null'>
+		       WORK_STATE     = #{work_state},
+		</if>
+		<if test='accuracy_result != null'>
+		       ACCURACY_RESULT     = #{accuracy_result},
+		</if>
+		<if test='speed_result != null'>
+		       SPEED_RESULT     = #{speed_result},
+		</if>
+		       UPD_USER_ID     = #{upd_user_id},
+		       UPD_DT          = SYSDATE
+		WHERE  SR_ID           = #{sr_id}
+	</update>
+	
+	<update id="updateWorkState" parameterType="HashMap">
+		UPDATE PROC_MASTER
+		   SET WORK_STATE = #{work_state}
+		<if test='proc_state != null'>
+		     , PROC_STATE = #{proc_state}
+		</if>
+		<if test='atch_file_id != null'>
+		     , ATCH_FILE_ID = #{atch_file_id}
+		</if>
+		<if test='work_dt_update_yn == "Y"'>
+		     , WORK_DT = SYSDATE
+		</if>
+		 WHERE SR_ID = #{sr_id}
+	</update>
+	
+	<select id="searchRelIncList" parameterType="String" resultType="kr.or.hrdkorea.itsm.nbpm.model.NbpmProcessVO">
+		SELECT B.ID AS TASK_ID
+			 , A.PROC_ID AS PROCESSINSTANCEID
+			 , A.REQ_TYPE AS PROCESS_TYPE
+			 , A.SR_ID
+		  FROM PROC_MASTER A, TASK B
+		 WHERE A.REL_INC_SR_ID = (SELECT SR_ID FROM PROC_MASTER WHERE SR_ID = #{sr_id} AND WORK_STATE = 'WORKCOMP')
+		   AND A.PROC_ID = B.PROCESSINSTANCEID 
+		   AND B.ACTUALOWNER_ID = 'rel_inc'
+		   AND B.STATUS = 'Reserved'
+	</select>
+	
+	<select id="searchNbpmAlamListRequest" parameterType="kr.or.hrdkorea.itsm.nbpm.model.NbpmProcessVO" resultType="HashMap">
+		SELECT  A.EMAIL_SEND
+			 , A.SMS_SEND
+             , A.NODEID
+             , A.EMAIL_TEMPLATE_ID
+             , A.SMS_TEMPLATE_ID
+             , A.PROCESSID
+             , B.USER_ID AS TARGET_USER_ID
+             , B.EMAIL
+             , (SELECT EMAIL FROM SYS_USER WHERE USER_ID = #{login_user_id}) AS FROMEMAIL
+             , B.HP_NO
+             , A.NODENAME
+        FROM NBPM_NODE_DETAIL A,    
+      ( SELECT 'REQUEST' AS WORK_STATE, D.USER_ID, D.EMAIL, D.HP_NO
+        FROM PROC_SERVICE A,
+             AM_SERVICE_OPER B,
+             SYS_USERGRP_TO_USER C,
+             SYS_USER D
+       WHERE A.SR_ID = #sr_id#
+         AND A.SUB_WORK = B.SERVICE_ID
+         AND B.OPER_USER_ID = C.USER_ID
+         AND C.USER_GRP_ID = 'sdesk'
+         AND C.USER_ID = D.USER_ID
+       ) B      
+       WHERE A.PROCESSID = 'SERVICE_v_1'
+         AND A.TASK_NAME = B.WORK_STATE
+	</select>
+	
+	<select id="searchNbpmAlamListCheck" parameterType="kr.or.hrdkorea.itsm.nbpm.model.NbpmProcessVO" resultType="HashMap">
+		SELECT  A.EMAIL_SEND
+			 , A.SMS_SEND
+             , A.NODEID
+             , A.EMAIL_TEMPLATE_ID
+             , A.SMS_TEMPLATE_ID
+             , A.PROCESSID
+             , B.USER_ID AS TARGET_USER_ID
+             , B.EMAIL
+             , (SELECT EMAIL FROM SYS_USER WHERE USER_ID = #{login_user_id}) AS FROMEMAIL
+             , B.HP_NO
+             , A.NODENAME
+        FROM NBPM_NODE_DETAIL A,    
+		     ( SELECT 'SERVICE_CHECK' AS WORK_STATE, B.USER_ID, B.EMAIL, B.HP_NO
+		         FROM PROC_MASTER A,
+		              SYS_USER B
+		        WHERE A.SR_ID = #{sr_id}
+		          AND A.REQ_USER_ID = B.USER_ID 
+		     ) B
+       WHERE A.PROCESSID = 'SERVICE_v_1'
+         AND A.TASK_NAME = B.WORK_STATE
+      
+	</select>
+	
+	<select id="searchNbpmAlamList" parameterType="kr.or.hrdkorea.itsm.nbpm.model.NbpmProcessVO" resultType="HashMap">
+		SELECT A.EMAIL_SEND
+			 , A.SMS_SEND
+             , A.NODEID
+             , A.EMAIL_TEMPLATE_ID
+             , A.SMS_TEMPLATE_ID
+             , A.PROCESSID
+             , B.ACTUALOWNER_ID AS TARGET_USER_ID
+             , EMAIL
+             , HP_NO
+             , A.NODENAME
+             , B.ID
+		  FROM NBPM_NODE_DETAIL A
+			 , TASK B
+		     , SYS_USER C
+		 WHERE A.PROCESSID = #{processId}
+		   AND A.NODEID = B.NODEID
+		   AND B.ID = #task_id#
+		   AND B.ACTUALOWNER_ID = C.USER_ID
+		   AND A.TASK_NAME = B.TASK_NAME
+		   AND A.PROCESSID = B.PROCESSID
+		   AND ( B.EMAILSENDED IS NULL OR B.EMAILSENDED != 'Y')
+	</select>
+	
+	
+
+</mapper>

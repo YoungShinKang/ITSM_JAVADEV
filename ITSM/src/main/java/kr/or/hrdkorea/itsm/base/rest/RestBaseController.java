@@ -39,7 +39,7 @@ public class RestBaseController {
 	    return result;
 	}
 	
-	@GetMapping("/searchServiceCombo/{codeId}")
+	@GetMapping("/searchServiceSubCombo/{codeId}")
 	public ResultVO searchServiceSubCombo(@PathVariable("codeId") String codeId) 
 	{
 		ResultVO result = new ResultVO();

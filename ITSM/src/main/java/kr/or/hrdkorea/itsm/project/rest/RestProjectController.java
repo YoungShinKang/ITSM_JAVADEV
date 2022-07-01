@@ -45,8 +45,6 @@ public class RestProjectController {
 		
 	@PostMapping("/searchBoradList")
 	public ResultVO searchBoradList(@RequestBody ModelMap paramMap) throws Exception
-	//@GetMapping("/searchBoradList")
-	//public ResultVO searchBoradList(ModelMap paramMap) throws Exception	
 	{
 		ResultVO resultVO = new ResultVO();
 		try {

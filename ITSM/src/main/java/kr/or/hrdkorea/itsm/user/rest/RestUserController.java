@@ -47,13 +47,18 @@ public class RestUserController {
 	@Resource(name = "itsmProjectService")
 	ItsmProjectService itsmProjectService;
 	
+	/**
+	 * user role만 들고오는 메소드인데, 아래의 user info와 통합되어 효용이 없어서 depricate하는게 옳을 것 같다.
+	 * @param userId
+	 * @return
+	 */
+	
 	@GetMapping("/role/{userId}")
 	public ResultVO searchAuthList(@PathVariable("userId") String userId) 
 	{
 		ResultVO resultVO = new ResultVO();
 		try {
 			
-			//paramMap.put("user_id", paramMap.get("userId"));
 			ModelMap paramMap = new ModelMap();		
 			paramMap.put("user_id", userId);
 			
@@ -74,8 +79,17 @@ public class RestUserController {
 	public UserVO searchUserInfo(@PathVariable("userId") String userId) 
 	{
 		UserVO userVO = null;
-		try {
-			userVO = sysUserService.selectUserInfo(userId);			
+		try {			
+			userVO = sysUserService.selectUserInfo(userId);	
+			
+			
+			//user role을 받아오는 부분
+			ModelMap paramMap = new ModelMap();		
+			paramMap.put("user_id", userId);			
+			HashMap resultMap = new HashMap();
+			List sysAuthList = this.itsmProjectService.searchUserSystemAuthList(paramMap);
+			userVO.setSysAuthList(sysAuthList);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
