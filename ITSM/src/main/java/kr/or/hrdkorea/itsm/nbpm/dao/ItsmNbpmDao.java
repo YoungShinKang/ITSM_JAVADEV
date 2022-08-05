@@ -85,19 +85,19 @@ public class ItsmNbpmDao extends EgovAbstractMapper {
 	}
 	
 	public int selectExistSrIdInDetailTable(String checkQuery, Map paramMap) throws SQLException, Exception	{
-		return ((Integer)this.getSqlSession().selectOne("ProcDetail." + checkQuery, paramMap)).intValue();
+		return ((Integer)this.getSqlSession().selectOne("ITSM_PROC_DETAIL." + checkQuery, paramMap)).intValue();
 	}
 	
 	public void excuteProcessDetail(String queryKey, Map paramMap) throws SQLException, Exception {
-		this.getSqlSession().update("ProcDetail." + queryKey, paramMap);
+		this.getSqlSession().update("ITSM_PROC_DETAIL." + queryKey, paramMap);
 	}
 	
 	public void deleteGridData(String gridDeleteQueryKey, Map param) throws SQLException, Exception {
-		this.getSqlSession().update("ProcDetail." + gridDeleteQueryKey, param);
+		this.getSqlSession().update("ITSM_PROC_DETAIL." + gridDeleteQueryKey, param);
 	}
 	
 	public void insertGridData(String gridInsertQueryKey, Map param) throws SQLException, Exception {
-		this.getSqlSession().update("ProcDetail." + gridInsertQueryKey, param);
+		this.getSqlSession().update("ITSM_PROC_DETAIL." + gridInsertQueryKey, param);
 	}
 	
 	public void insertProcessDetail(Map detailInfo) throws SQLException, Exception {

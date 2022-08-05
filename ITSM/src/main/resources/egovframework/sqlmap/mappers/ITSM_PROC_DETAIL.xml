@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ITSM_PROC_DETAIL">
+
+	<select id="countPROC_SERVICE" parameterType="HashMap" resultType="Integer">
+		SELECT
+		COUNT(SR_ID) 
+		FROM PROC_SERVICE 
+		WHERE SR_ID = #{sr_id}
+	</select>
+	
+	<insert id="insertPROC_SERVICE" parameterType="HashMap">
+		INSERT INTO PROC_SERVICE ( 
+		SR_ID 
+		, SERVICE_TYPE 
+		, APPROVAL_YN 
+		, WORK_RESULT 
+		, CHANGE_SR_ID 
+		, INCIDENT_SR_ID 
+		, RESULT_HOPE_DT 
+		, RESULT_SERVICE_TYPE 
+		, KEDB_ID 
+		, SYSTEM_TYPE 
+		, SUB_WORK 
+		, UPD_USER_ID 
+		, UPD_DT 
+		) 
+		VALUES ( 
+		#{sr_id}
+		, #{service_type}
+		, #{approval_yn}
+		, #{work_result}
+		, #{change_sr_id}
+		, #{incident_sr_id}
+		, TO_DATE(#{result_hope_dt}, 'YYYY-MM-DDHH24MI')
+		, #{result_service_type}
+		, #{kedb_id}
+		, #{system_type}
+		, #{sub_work}
+		, #{upd_user_id}
+		, SYSDATE
+		)
+	</insert>	
+	
+	
+	<update id="updatePROC_SERVICE2" parameterType="HashMap">
+		UPDATE PROC_SERVICE 
+		SET 
+		<if test='service_type != null'>
+			SERVICE_TYPE = #{service_type}, 
+		</if>
+		<if test='approval_yn != null'>
+			APPROVAL_YN = #{approval_yn}, 
+		</if>
+		<if test='work_result != null'>
+			WORK_RESULT = #{work_result}, 
+		</if>
+		<if test='change_sr_id != null'>
+			CHANGE_SR_ID = #{change_sr_id}, 
+		</if>
+		<if test='incident_sr_id != null'>
+			INCIDENT_SR_ID = #{incident_sr_id}, 
+		</if>
+		<if test='result_hope_dt != null'>
+			RESULT_HOPE_DT = TO_DATE(#{result_hope_dt}, 'YYYY-MM-DDHH24MI'), 
+		</if>
+		<if test='result_service_type != null'>
+			RESULT_SERVICE_TYPE = #{result_service_type}, 
+		</if>
+		<if test='kedb_id != null'>
+			KEDB_ID = #{kedb_id}, 
+		</if>
+		<if test='system_type != null'>
+			SYSTEM_TYPE = #{system_type}, 
+		</if>
+			SUB_WORK = #{sub_work}, 
+		<if test='upd_user_id != null'>
+			UPD_USER_ID = #{upd_user_id}, 
+		</if>
+			UPD_DT = SYSDATE 
+		WHERE SR_ID = #{sr_id}
+	</update>
+	
+	
+	
+</mapper>
