@@ -84,6 +84,5 @@ public class ItsmIssueDao extends EgovAbstractMapper {
 		return handler.getReturnList();
 	  }
 	
-	
 
 }

@@ -10,8 +10,6 @@ import kr.or.hrdkorea.itsm.issue.model.ItsmIssueVO;
 
 public interface ItsmIssueService {
 	
-	public List<ItsmIssueVO> selectItsmIssues(String userId);
-	
 	public Map selectIssueDetail(ModelMap paramMap) throws Exception;
 
 }

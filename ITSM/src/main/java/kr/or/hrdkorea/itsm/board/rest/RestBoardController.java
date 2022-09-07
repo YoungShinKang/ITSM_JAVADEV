@@ -46,26 +46,6 @@ public class RestBoardController {
 	ItsmIssueService itsmIssueService;
 	
 	
-	/**
-	 * 임시 구현상태
-	 * @param userId
-	 * @return
-	 */
-	@GetMapping("/list/{userId}")
-	public ItsmProjectVO testCall(@PathVariable("userId") String userId) {
-		ItsmProjectVO pjt = new ItsmProjectVO();
-		pjt.setItsmBoardInfo(itsmBoardService.selectItsmBoardInfo(userId));
-		pjt.setIssues(itsmIssueService.selectItsmIssues(userId));		
-		return pjt;
-	}
-	
-	@PostMapping("/createIssue")
-	public ResponseEntity<ItsmIssueVO> cityAdd(@RequestBody ItsmIssueVO itsmIssueVO) {
-		//log.debug("itsmIssueVO = {}", itsmIssueVO.toString());
-		return new ResponseEntity<>(itsmIssueVO, HttpStatus.OK);
-	}
-	
-	
 	@PostMapping("/searchServiceRequestList")
 	public ResultVO searchServicedeskList(@RequestBody ModelMap paramMap) throws Exception
 	  {		  

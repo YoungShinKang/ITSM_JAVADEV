@@ -409,6 +409,17 @@
 		   AND ( B.EMAILSENDED IS NULL OR B.EMAILSENDED != 'Y')
 	</select>
 	
+	<select id="selectProcessOperList" parameterType="String" resultType="HashMap">
+		SELECT
+			   SR_ID
+			 , OPER_TYPE
+			 , SEQ
+			 , OPER_USER_ID
+			 , FC_GET_USER_NM(OPER_USER_ID) AS OPER_USER_NM
+		  FROM PROC_OPER
+		 WHERE SR_ID = #{sr_id#}
+	</select>
+	
 	
 
 </mapper>

@@ -66,6 +66,10 @@ public class ItsmNbpmDao extends EgovAbstractMapper {
 		this.getSqlSession().insert("ITSM_NBPM.insertProcessOrerator", operInfo);
 	}
 	
+	public List selectProcessOperList(String sr_id) throws SQLException, Exception {
+	    return selectList("ITSM_NBPM.selectProcessOperList", sr_id);
+	}
+	
 	public void insertProcessItem(Map itemInfo) throws SQLException, Exception
 	{
 		this.getSqlSession().insert("ITSM_NBPM.insertProcessItem", itemInfo);
