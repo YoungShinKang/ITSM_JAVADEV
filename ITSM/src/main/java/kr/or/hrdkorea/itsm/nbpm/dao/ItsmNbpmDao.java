@@ -138,6 +138,11 @@ public class ItsmNbpmDao extends EgovAbstractMapper {
 		return this.getSqlSession().selectList("ITSM_NBPM.searchRelIncList", sr_id);
 	}	
 	
+	
+	public int checkTaskStatus(NbpmProcessVO processVO) {
+	    return ((Integer)this.getSqlSession().selectOne("ITSM_NBPM.checkTaskStatus", processVO)).intValue();
+	}
+	
 	public List searchNbpmAlamList(NbpmProcessVO processVO) throws SQLException, Exception 	{
 		if("REQUEST".equals(processVO.getWork_state())) {
 		return this.getSqlSession().selectList("ITSM_NBPM.searchNbpmAlamListRequest", processVO);

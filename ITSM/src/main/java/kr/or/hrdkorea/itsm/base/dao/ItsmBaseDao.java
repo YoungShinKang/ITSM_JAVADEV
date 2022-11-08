@@ -31,6 +31,10 @@ public class ItsmBaseDao extends EgovAbstractMapper {
 		}else{
 			return selectList("ITSM_BASE.searchServiceTypeCombo_Push", paramMap);
 		}
+	}	
+	
+	public List searchOperUserCombo(ModelMap paramMap) throws SQLException {
+		return selectList("ITSM_BASE.searchOperUserCombo", paramMap);
 	}
 	
 

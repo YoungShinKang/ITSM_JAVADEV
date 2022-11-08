@@ -21,6 +21,12 @@
 		   AND B.PROCESSID = #{processId}
 	</select>
 	
+	<select id="checkTaskStatus" parameterType="kr.or.hrdkorea.itsm.nbpm.model.NbpmProcessVO" resultType="Integer">
+		SELECT COUNT(*)
+		  FROM TASK
+		 WHERE ID = #{task_id, jdbcType=VARCHAR} AND STATUS = 'Completed'
+	</select>
+	
 	<select id="createSrId" resultType="String">
  		SELECT 'SR'|| TO_CHAR(SYSDATE,'YYMMDD')||'_' || LPAD(NBPM_SR_SEQ.NEXTVAL,4,'0') NBPM_SR_SEQ FROM DUAL	
 	</select>

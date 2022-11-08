@@ -143,4 +143,124 @@ public class RestIssueController {
 		
 		return resultVO;
 	}
+	
+	
+	//이관
+	@PostMapping("/processTransfer")
+	public ResultVO processTransfer(@RequestBody ModelMap paramMap) 
+	{
+		ResultVO resultVO = new ResultVO();
+		String message = "";
+		try {
+			String loginUserId = (String)paramMap.get("user_id");
+		
+			NbpmProcessVO processVO = NbpmUtil.setProcessParameter(paramMap);
+			processVO.setWorker_user_id(loginUserId);
+			
+			String nextTaskName = getNextTaskName(processVO);
+			
+			boolean workCheck = this.itsmNbpmService.checkTaskStatus(processVO);
+			if (workCheck) {
+				this.itsmNbpmService.registerUser(processVO, paramMap);
+			
+				paramMap.put("proc_state", "ING"); //이관시에 state가 ING로 바뀐다. 요청시에는 이 proc_state가 비어있다.
+				   
+				paramMap.put("next_task", nextTaskName);
+				 
+				//저장하는 작업 수행
+				Map result = this.itsmNbpmService.executeTask(processVO, paramMap);
+				
+				//메일 혹은 SMS 보내기.
+				this.itsmNbpmService.notifyTask(processVO, result);
+				
+				resultVO.setResultMsg("등록되었습니다.");
+				resultVO.setResultMap((HashMap)result);
+			} else {
+				HashMap result = new HashMap();
+				result.put("selfWork", Boolean.valueOf(false));
+				resultVO.setResultMap(result);
+				resultVO.setResultMsg("처리상태 확인이 필요합니다.\n목록을 갱신하고 재시도 하여 주세요");
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultVO;
+	}
+	
+	
+	
+	public String getNextTaskName(NbpmProcessVO processVO) 
+	{
+		  
+		String taskName = null;
+			  
+		if(processVO.getTask_name() == null){
+		taskName = "TEMP";
+		}else{
+		taskName = processVO.getTask_name();
+		}
+		
+		/** 단계가 많이 바뀌어 JAVA파일에서 정리함. */
+		String[] stateList = {"TEMP", "REQUEST"  , /*"SERVICE_ACCEPT",*/ "SERVICE_GROUP", /*"SERVICE_CHECK",*/ "SERVICE_RESULT_INSERT","SERVICE_CHECK", "RESULT"    , "END"};
+		String[] roleList = {"REQUEST", "REQUESTOR", /*"SERVICEDESK"   ,*/ "SERVICEDESK"  , /*"REQUESTOR"    ,*/ "SERVICE_ROLE2"        ,"SERVICEDESK",  "REQUESTOR" , ""};
+		String[] nodeNameList  = {"임시저장","서비스요청", /*"요청접수"   ,*/ "서비스분류"  , /*"결과확인"    ,*/ "서비스결과등록"        ,"서비스결과승인",  "서비스만족도등록" , ""};
+		
+		String nextTaskName = "";
+		String currentRoleId = "";
+		String nodeName ="";
+		for (int i = 0; i < stateList.length; i++) {
+			if (taskName.equals(stateList[i])) {
+			if (i + 1 == stateList.length) {
+			nextTaskName = stateList[i];
+			currentRoleId = roleList[i];
+			nodeName = nodeNameList[i];
+			} else {
+			nextTaskName = stateList[i + 1];
+			currentRoleId = roleList[i + 1];
+			nodeName = nodeNameList[i + 1];
+			break;
+			}
+			}
+		}
+		processVO.setCurrent_role_id(currentRoleId);
+		processVO.setNodename(nodeName);
+		    
+		return nextTaskName;
+	}
+	  
+	  
+	public String getPrevTaskName(NbpmProcessVO processVO) 
+	{
+		  
+		//편집인 상황에서는 task name이 null이 올 수 없다
+		String taskName = processVO.getTask_name();
+		  
+		/** 단계가 많이 바뀌어 JAVA파일에서 정리함. */
+		String[] stateList = {"TEMP","REQUEST","SERVICE_GROUP","SERVICE_RESULT_INSERT","SERVICE_CHECK","RESULT","END"};
+		String[] roleList = {"REQUEST","REQUESTOR","SERVICEDESK","SERVICE_ROLE2","SERVICEDESK","REQUESTOR",""};
+		String[] nodeNameList  = {"임시저장","서비스요청","서비스분류","서비스결과등록","서비스결과승인", "서비스만족도등록",""};
+		
+		String nextTaskName = "";
+		String currentRoleId = "";
+		String nodeName ="";
+		for (int i = stateList.length-1; i >= 0; i--) {
+		if (taskName.equals(stateList[i])) {
+		if (i == 0) {
+		nextTaskName = stateList[i];
+		currentRoleId = roleList[i];
+		nodeName = nodeNameList[i];
+		} else {
+		nextTaskName = stateList[i - 1];
+		currentRoleId = roleList[i - 1];
+		nodeName = nodeNameList[i - 1];
+		break;
+		}
+		}
+		}
+		processVO.setCurrent_role_id(currentRoleId);
+		processVO.setNodename(nodeName);
+		    
+		return nextTaskName;
+	}
 }

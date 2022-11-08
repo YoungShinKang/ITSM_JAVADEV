@@ -19,8 +19,11 @@ public interface ItsmNbpmService {
 	public abstract Map executeTask(NbpmProcessVO processVO, Map paramMap)
 			throws Exception;
 	
-	public void notifyTask(NbpmProcessVO processVO, Map result) 
+	public abstract void notifyTask(NbpmProcessVO processVO, Map result) 
 			throws Exception;
+	
+	public abstract boolean checkTaskStatus(NbpmProcessVO paramNbpmProcessVO)
+		    throws Exception;
 
 
 }

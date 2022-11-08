@@ -97,6 +97,7 @@
 <select id="searchTaskCommentList" parameterType="String" resultType="HashMap">
 	SELECT
 		FC_GET_USER_NM(B.ACTUALOWNER_ID) AS WORK_USER_NM
+		, B.ACTUALOWNER_ID AS WORK_USER
 		, C.NODENAME
 		, TO_CHAR(B.COMPLETEDON, 'YYYY-MM-DD HH24:MI:SS') AS WORK_DATE
 		, B.COMMENT_TEXT TEXT

@@ -21,6 +21,12 @@
 		   AND B.PROCESSID = #{processId}
 	</select>
 	
+	<select id="checkTaskStatus" parameterType="kr.or.hrdkorea.itsm.nbpm.model.NbpmProcessVO" resultType="Integer">
+		SELECT COUNT(*)
+		  FROM TASK
+		 WHERE ID = #{task_id, jdbcType=VARCHAR} AND STATUS = 'Completed'
+	</select>
+	
 	<select id="createSrId" resultType="String">
  		SELECT 'SR'|| TO_CHAR(SYSDATE,'YYMMDD')||'_' || LPAD(NBPM_SR_SEQ.NEXTVAL,4,'0') NBPM_SR_SEQ FROM DUAL	
 	</select>
@@ -407,6 +413,17 @@
 		   AND A.TASK_NAME = B.TASK_NAME
 		   AND A.PROCESSID = B.PROCESSID
 		   AND ( B.EMAILSENDED IS NULL OR B.EMAILSENDED != 'Y')
+	</select>
+	
+	<select id="selectProcessOperList" parameterType="String" resultType="HashMap">
+		SELECT
+			   SR_ID
+			 , OPER_TYPE
+			 , SEQ
+			 , OPER_USER_ID
+			 , FC_GET_USER_NM(OPER_USER_ID) AS OPER_USER_NM
+		  FROM PROC_OPER
+		 WHERE SR_ID = #{sr_id#}
 	</select>
 	
 	

@@ -75,5 +75,23 @@ public class RestBaseController {
 	}
 	
 	
+	@GetMapping("/searchOperUserCombo/{srid}")
+	public ResultVO searchOperUserCombo(@PathVariable("srid") String srid) 
+	{
+		ResultVO result = new ResultVO();
+	    GridVO gridVO = new GridVO();
+	    
+	    ModelMap paramMap = new ModelMap();		
+		paramMap.put("sr_id", srid);
+	    
+	    try {
+	      gridVO.setRows(this.itsmBaseService.searchServiceTypeCombo(paramMap));
+	      result.setGridVO(gridVO);
+	    } catch (Exception e) {
+	    }
+	    return result;
+	}
+	
+	
 
 }

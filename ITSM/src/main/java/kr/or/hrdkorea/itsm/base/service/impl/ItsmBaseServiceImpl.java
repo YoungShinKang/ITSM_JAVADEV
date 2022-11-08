@@ -32,5 +32,10 @@ public class ItsmBaseServiceImpl implements ItsmBaseService {
 	public List searchServiceTypeCombo(ModelMap paramMap) throws Exception {
 		return this.itsmBaseDao.searchServiceTypeCombo(paramMap);
 	}
+	
+	public List searchOperUserCombo(ModelMap paramMap) throws Exception {
+		return this.itsmBaseDao.searchOperUserCombo(paramMap);
+	}	
+	
 
 }

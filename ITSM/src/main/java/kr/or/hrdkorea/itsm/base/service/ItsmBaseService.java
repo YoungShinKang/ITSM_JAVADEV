@@ -13,5 +13,9 @@ public interface ItsmBaseService {
 	
 	public abstract List searchServiceTypeCombo(ModelMap paramModelMap)
 			throws Exception;
+	
+	public abstract List searchOperUserCombo(ModelMap paramModelMap)
+			throws Exception;	
+	
 
 }

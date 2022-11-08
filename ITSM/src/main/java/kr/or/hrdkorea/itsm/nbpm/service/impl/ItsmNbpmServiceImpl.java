@@ -447,6 +447,16 @@ public class ItsmNbpmServiceImpl implements ItsmNbpmService {
 			throw e;
 		}
 	}
+	
+	public boolean checkTaskStatus(NbpmProcessVO processVO) throws Exception
+	{
+		boolean result = true;
+		int count = this.itsmNbpmDao.checkTaskStatus(processVO);
+		if (count > 0) {
+			result = false;
+		}
+		return result;
+	}
 
 
 
