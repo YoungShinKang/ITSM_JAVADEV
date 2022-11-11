@@ -85,9 +85,10 @@ public class RestBaseController {
 		paramMap.put("sr_id", srid);
 	    
 	    try {
-	      gridVO.setRows(this.itsmBaseService.searchServiceTypeCombo(paramMap));
+	      gridVO.setRows(this.itsmBaseService.searchOperUserCombo(paramMap));
 	      result.setGridVO(gridVO);
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    }
 	    return result;
 	}

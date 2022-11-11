@@ -43,7 +43,7 @@
 	</insert>	
 	
 	
-	<update id="updatePROC_SERVICE2" parameterType="HashMap">
+	<update id="updatePROC_SERVICE" parameterType="HashMap">
 		UPDATE PROC_SERVICE 
 		SET 
 		<if test='service_type != null'>
@@ -73,7 +73,9 @@
 		<if test='system_type != null'>
 			SYSTEM_TYPE = #{system_type}, 
 		</if>
+		<if test='sub_work != null'>
 			SUB_WORK = #{sub_work}, 
+		</if>
 		<if test='upd_user_id != null'>
 			UPD_USER_ID = #{upd_user_id}, 
 		</if>
