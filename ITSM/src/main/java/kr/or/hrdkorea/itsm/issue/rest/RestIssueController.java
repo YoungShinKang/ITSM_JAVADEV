@@ -188,6 +188,95 @@ public class RestIssueController {
 		return resultVO;
 	}
 	
+	//완료처리
+	@PostMapping("/processResultInsert")
+	public ResultVO processResultInsert(@RequestBody ModelMap paramMap) 
+	{
+		ResultVO resultVO = new ResultVO();
+		String message = "";
+		try {
+			String loginUserId = (String)paramMap.get("user_id");
+			  
+			NbpmProcessVO processVO = NbpmUtil.setProcessParameter(paramMap);
+			  
+			  
+			processVO.setWorker_user_id(loginUserId);
+			String nextTaskName = getNextTaskName(processVO);
+			  
+			boolean workCheck = this.itsmNbpmService.checkTaskStatus(processVO);
+			
+			if (workCheck) {
+				
+				this.itsmNbpmService.registerUser(processVO, paramMap);				
+				paramMap.put("next_task", nextTaskName);				   
+				paramMap.put("proc_state", "ING");				
+				paramMap.put("nbpm_comment", paramMap.get("work_result"));			
+				
+				Map result = this.itsmNbpmService.executeTask(processVO, paramMap);	        
+				
+				//메일 혹은 SMS 보내기.
+				this.itsmNbpmService.notifyTask(processVO, result);
+				
+				
+				resultVO.setResultMsg("등록되었습니다.");
+				resultVO.setResultMap((HashMap)result);
+			    
+			} else {
+				
+				HashMap result = new HashMap();
+				result.put("selfWork", Boolean.valueOf(false));
+				resultVO.setResultMap(result);
+				resultVO.setResultMsg("처리상태 확인이 필요합니다.\n목록을 갱신하고 재시도 하여 주세요");
+				
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return resultVO;
+	}
+	
+	
+	//정보화 사업2부 담당자 확인
+	@PostMapping("/processCheck")
+	public ResultVO processCheck(@RequestBody ModelMap paramMap) 
+	{
+		ResultVO resultVO = new ResultVO();
+		String message = "";
+		try {
+			String loginUserId = (String)paramMap.get("user_id");
+			
+			NbpmProcessVO processVO = NbpmUtil.setProcessParameter(paramMap);
+			processVO.setWorker_user_id(loginUserId);
+			String nextTaskName = getNextTaskName(processVO);
+			
+			boolean workCheck = this.itsmNbpmService.checkTaskStatus(processVO);
+			if (workCheck) {
+				this.itsmNbpmService.registerUser(processVO, paramMap);
+				
+				paramMap.put("proc_state", "ING");
+				paramMap.put("next_task", nextTaskName);
+				Map result = this.itsmNbpmService.executeTask(processVO, paramMap);
+				processVO.setWork_state("SERVICE_CHECK");
+				processVO.setLogin_user_id(loginUserId);
+				
+				this.itsmNbpmService.notifyTask(processVO, result);
+				resultVO.setResultMsg("등록되었습니다.");
+				resultVO.setResultMap((HashMap)result);
+			} else {
+				HashMap result = new HashMap();
+				result.put("selfWork", Boolean.valueOf(false));
+				resultVO.setResultMap(result);
+				resultVO.setResultMsg("처리상태 확인이 필요합니다.\n목록을 갱신하고 재시도 하여 주세요");
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultVO;
+	}
+	
 	
 	
 	public String getNextTaskName(NbpmProcessVO processVO) 
@@ -202,25 +291,25 @@ public class RestIssueController {
 		}
 		
 		/** 단계가 많이 바뀌어 JAVA파일에서 정리함. */
-		String[] stateList = {"TEMP", "REQUEST"  , /*"SERVICE_ACCEPT",*/ "SERVICE_GROUP", /*"SERVICE_CHECK",*/ "SERVICE_RESULT_INSERT","SERVICE_CHECK", "RESULT"    , "END"};
-		String[] roleList = {"REQUEST", "REQUESTOR", /*"SERVICEDESK"   ,*/ "SERVICEDESK"  , /*"REQUESTOR"    ,*/ "SERVICE_ROLE2"        ,"SERVICEDESK",  "REQUESTOR" , ""};
-		String[] nodeNameList  = {"임시저장","서비스요청", /*"요청접수"   ,*/ "서비스분류"  , /*"결과확인"    ,*/ "서비스결과등록"        ,"서비스결과승인",  "서비스만족도등록" , ""};
+		String[] stateList = {"TEMP", "REQUEST","SERVICE_GROUP","SERVICE_RESULT_INSERT","SERVICE_CHECK","RESULT","END"};
+		String[] roleList = {"REQUEST","REQUESTOR","SERVICEDESK","SERVICE_ROLE2","SERVICEDESK","REQUESTOR",""};
+		String[] nodeNameList  = {"임시저장","서비스요청","서비스분류","서비스결과등록","서비스결과승인","서비스만족도등록",""};
 		
 		String nextTaskName = "";
 		String currentRoleId = "";
 		String nodeName ="";
 		for (int i = 0; i < stateList.length; i++) {
 			if (taskName.equals(stateList[i])) {
-			if (i + 1 == stateList.length) {
-			nextTaskName = stateList[i];
-			currentRoleId = roleList[i];
-			nodeName = nodeNameList[i];
-			} else {
-			nextTaskName = stateList[i + 1];
-			currentRoleId = roleList[i + 1];
-			nodeName = nodeNameList[i + 1];
-			break;
-			}
+				if (i + 1 == stateList.length) {
+					nextTaskName = stateList[i];
+					currentRoleId = roleList[i];
+					nodeName = nodeNameList[i];
+				} else {
+					nextTaskName = stateList[i + 1];
+					currentRoleId = roleList[i + 1];
+					nodeName = nodeNameList[i + 1];
+					break;
+				}
 			}
 		}
 		processVO.setCurrent_role_id(currentRoleId);
@@ -245,18 +334,18 @@ public class RestIssueController {
 		String currentRoleId = "";
 		String nodeName ="";
 		for (int i = stateList.length-1; i >= 0; i--) {
-		if (taskName.equals(stateList[i])) {
-		if (i == 0) {
-		nextTaskName = stateList[i];
-		currentRoleId = roleList[i];
-		nodeName = nodeNameList[i];
-		} else {
-		nextTaskName = stateList[i - 1];
-		currentRoleId = roleList[i - 1];
-		nodeName = nodeNameList[i - 1];
-		break;
-		}
-		}
+			if (taskName.equals(stateList[i])) {
+				if (i == 0) {
+					nextTaskName = stateList[i];
+					currentRoleId = roleList[i];
+					nodeName = nodeNameList[i];
+				} else {
+					nextTaskName = stateList[i - 1];
+					currentRoleId = roleList[i - 1];
+					nodeName = nodeNameList[i - 1];
+					break;
+				}
+			}
 		}
 		processVO.setCurrent_role_id(currentRoleId);
 		processVO.setNodename(nodeName);

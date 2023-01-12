@@ -83,6 +83,11 @@
 		WHERE SR_ID = #{sr_id}
 	</update>
 	
+	<delete id="deleteSERVICE_RESOURCES" parameterType="HashMap">
+	DELETE FROM SERVICE_RESOURCES 
+	WHERE SR_ID = #{sr_id}
+	</delete>
+	
 	
 	
 </mapper>
